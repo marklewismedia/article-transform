@@ -45,24 +45,28 @@ function Icon({ name, size = 16, color = tokens.teal }) {
 }
 
 // ── Source attribution block — shown prominently on every card ─────────────────
+function VerwellMindLogo({ height = 15 }) {
+  return (
+    <svg height={height} viewBox="0 0 130 18" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: "block", flexShrink: 0 }}>
+      <path d="M2 9 C2 4.5 5.5 2 9 2 C9 2 9 9 4 13 C2.5 11.5 2 10.5 2 9Z" fill="#00A499"/>
+      <path d="M9 2 C12.5 2 16 4.5 16 9 C16 10.5 15.5 11.5 14 13 C9 9 9 2 9 2Z" fill="#004B45"/>
+      <text x="22" y="13.5" fontFamily="Georgia, serif" fontSize="11.5" fontWeight="700" fill="#1E2B3A" letterSpacing="-0.3">Verywell Mind</text>
+    </svg>
+  );
+}
+
 function SourceLine({ meta }) {
   return (
     <div style={{
       display: "flex", alignItems: "center", gap: "8px",
       marginBottom: "14px",
+      paddingBottom: "12px",
+      borderBottom: `1px solid ${tokens.border}`,
     }}>
-      <div style={{
-        fontSize: "10px", fontWeight: "700", letterSpacing: "0.8px",
-        textTransform: "uppercase", color: "white",
-        background: "#CC0000",           // Verywell Mind brand red
-        padding: "3px 7px", borderRadius: "2px",
-        fontFamily: "var(--sans)",
-      }}>
-        Verywell Mind
-      </div>
+      <VerwellMindLogo height={15} />
       {meta.reviewedBy && (
         <span style={{ fontSize: "11px", color: tokens.muted, fontFamily: "var(--sans)" }}>
-          Reviewed by {meta.reviewedBy}
+          · Reviewed by {meta.reviewedBy}
         </span>
       )}
     </div>
@@ -319,15 +323,11 @@ export function FullArticleCard({ card, meta }) {
         <div style={{
           display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px",
         }}>
-          <div style={{
-            fontSize: "10px", fontWeight: "700", letterSpacing: "0.8px",
-            textTransform: "uppercase", color: "white",
-            background: "#CC0000",
-            padding: "3px 7px", borderRadius: "2px",
-            fontFamily: "var(--sans)",
-          }}>
-            Verywell Mind
-          </div>
+          <svg height={14} viewBox="0 0 130 18" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: "block", flexShrink: 0 }}>
+            <path d="M2 9 C2 4.5 5.5 2 9 2 C9 2 9 9 4 13 C2.5 11.5 2 10.5 2 9Z" fill="#4DD9D0"/>
+            <path d="M9 2 C12.5 2 16 4.5 16 9 C16 10.5 15.5 11.5 14 13 C9 9 9 2 9 2Z" fill="rgba(255,255,255,0.7)"/>
+            <text x="22" y="13.5" fontFamily="Georgia, serif" fontSize="11.5" fontWeight="700" fill="white" letterSpacing="-0.3">Verywell Mind</text>
+          </svg>
           <span style={{
             background: tokens.teal, color: "white",
             fontSize: "9px", fontWeight: "700", letterSpacing: "0.5px",
