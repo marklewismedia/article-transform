@@ -36,9 +36,17 @@ export function UploadScreen({ onArticleReady }) {
         }),
       });
 
+      // Always try to get the real error message from the server
       if (!response.ok) {
-        const err = await response.json().catch(() => ({ error: response.statusText }));
-        throw new Error(err.error || "Transformation failed");
+        let errMsg = `Server error (${response.status})`;
+        try {
+          const errBody = await response.json();
+          errMsg = errBody.error || errMsg;
+        } catch {
+          const text = await response.text().catch(() => "");
+          if (text) errMsg = text.slice(0, 200);
+        }
+        throw new Error(errMsg);
       }
 
       const article = await response.json();
@@ -163,7 +171,7 @@ export function UploadScreen({ onArticleReady }) {
                 Reading article…
               </div>
               <div style={{ fontSize: "12px", color: tokens.muted, textAlign: "center" }}>
-                Claude is transforming the content into cards. This takes around 10–20 seconds.
+                Claude is transforming the content into cards. This takes around 15–30 seconds.
               </div>
             </>
           ) : (
@@ -199,7 +207,7 @@ export function UploadScreen({ onArticleReady }) {
           )}
         </div>
 
-        {/* Error */}
+        {/* Error — now shows the real reason */}
         {state === "error" && (
           <div style={{
             background: tokens.roseLight,
@@ -210,7 +218,10 @@ export function UploadScreen({ onArticleReady }) {
             color: tokens.rose,
             lineHeight: "1.5",
           }}>
-            <strong>Something went wrong.</strong> {errorMsg}
+            <strong>Something went wrong.</strong>
+            <div style={{ marginTop: "4px", color: tokens.body, fontSize: "12px", wordBreak: "break-word" }}>
+              {errorMsg}
+            </div>
             <div
               onClick={() => setstate("idle")}
               style={{

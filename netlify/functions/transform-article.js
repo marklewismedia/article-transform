@@ -11,7 +11,7 @@ exports.handler = async (event) => {
   if (!apiKey) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "ANTHROPIC_API_KEY environment variable is not set." }),
+      body: JSON.stringify({ error: "ANTHROPIC_API_KEY is not set. Go to Netlify → Site configuration → Environment variables and add it, then redeploy." }),
     };
   }
 
@@ -19,12 +19,12 @@ exports.handler = async (event) => {
   try {
     body = JSON.parse(event.body);
   } catch {
-    return { statusCode: 400, body: JSON.stringify({ error: "Invalid JSON body." }) };
+    return { statusCode: 400, body: JSON.stringify({ error: "Invalid request body." }) };
   }
 
   const { imageBase64, mediaType = "image/png" } = body;
   if (!imageBase64) {
-    return { statusCode: 400, body: JSON.stringify({ error: "imageBase64 is required." }) };
+    return { statusCode: 400, body: JSON.stringify({ error: "No image data received." }) };
   }
 
   const systemPrompt = `You are a health content transformation engine for EczemaSpace, a calm and credible eczema companion app.
@@ -151,10 +151,15 @@ Rules:
     });
 
     if (!response.ok) {
-      const err = await response.text();
+      const errText = await response.text();
+      let detail = errText;
+      try {
+        const errJson = JSON.parse(errText);
+        detail = errJson?.error?.message || errText;
+      } catch {}
       return {
         statusCode: response.status,
-        body: JSON.stringify({ error: `Anthropic API error: ${err}` }),
+        body: JSON.stringify({ error: `Anthropic API error (${response.status}): ${detail}` }),
       };
     }
 
@@ -162,7 +167,7 @@ Rules:
     const rawText = data.content?.[0]?.text ?? "";
 
     // Strip any accidental markdown fences
-    const cleaned = rawText.replace(/^```json\s*/i, "").replace(/```\s*$/, "").trim();
+    const cleaned = rawText.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/,"").trim();
 
     let parsed;
     try {
@@ -171,8 +176,8 @@ Rules:
       return {
         statusCode: 500,
         body: JSON.stringify({
-          error: "Claude returned non-JSON output.",
-          raw: rawText.slice(0, 500),
+          error: "Claude returned unexpected output. Try uploading the screenshot again.",
+          raw: rawText.slice(0, 300),
         }),
       };
     }
@@ -185,7 +190,7 @@ Rules:
   } catch (err) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: err.message }),
+      body: JSON.stringify({ error: `Function error: ${err.message}` }),
     };
   }
 };

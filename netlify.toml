@@ -8,6 +8,12 @@
   port = 5173
   targetPort = 5173
 
+[functions]
+  node_bundler = "esbuild"
+
+[functions."transform-article"]
+  timeout = 30
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
