@@ -1,10 +1,79 @@
 import { tokens } from "./tokens.js";
 import { Tag, Trust } from "./ui.jsx";
 
+// ── Small SVG icons — geometric, muted, on-brand ──────────────────────────────
+// No emojis. Clean line icons that match the editorial health aesthetic.
+
+function Icon({ name, size = 16, color = tokens.teal }) {
+  const s = { width: size, height: size, flexShrink: 0 };
+  switch (name) {
+    case "check":
+      return <svg style={s} viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="7" stroke={color} strokeWidth="1.2"/>
+        <path d="M5 8l2 2 4-4" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>;
+    case "arrow-right":
+      return <svg style={s} viewBox="0 0 16 16" fill="none">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>;
+    case "dot":
+      return <svg style={{ ...s, width: 8, height: 8, marginTop: 5 }} viewBox="0 0 8 8" fill="none">
+        <circle cx="4" cy="4" r="3" fill={color}/>
+      </svg>;
+    case "dash":
+      return <svg style={{ ...s, width: 12, height: 2, marginTop: 8 }} viewBox="0 0 12 2" fill="none">
+        <path d="M1 1h10" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>;
+    case "loop":
+      return <svg style={s} viewBox="0 0 16 16" fill="none">
+        <path d="M2 8a6 6 0 1 0 6-6" stroke={color} strokeWidth="1.3" strokeLinecap="round"/>
+        <path d="M5 5L2 8l3 3" stroke={color} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>;
+    case "shield":
+      return <svg style={s} viewBox="0 0 16 16" fill="none">
+        <path d="M8 2l5 2v4c0 3-2.5 5-5 6C5.5 13 3 11 3 8V4l5-2z" stroke={color} strokeWidth="1.2"/>
+        <path d="M5.5 8l1.5 1.5 3-3" stroke={color} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>;
+    case "book":
+      return <svg style={s} viewBox="0 0 16 16" fill="none">
+        <path d="M3 3h4c.6 0 1 .4 1 1v8c0-.6-.4-1-1-1H3V3z" stroke={color} strokeWidth="1.2"/>
+        <path d="M13 3H9c-.6 0-1 .4-1 1v8c0-.6.4-1 1-1h4V3z" stroke={color} strokeWidth="1.2"/>
+      </svg>;
+    default:
+      return null;
+  }
+}
+
+// ── Source attribution block — shown prominently on every card ─────────────────
+function SourceLine({ meta }) {
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: "8px",
+      marginBottom: "14px",
+    }}>
+      <div style={{
+        fontSize: "10px", fontWeight: "700", letterSpacing: "0.8px",
+        textTransform: "uppercase", color: "white",
+        background: "#CC0000",           // Verywell Mind brand red
+        padding: "3px 7px", borderRadius: "2px",
+        fontFamily: "var(--sans)",
+      }}>
+        Verywell Mind
+      </div>
+      {meta.reviewedBy && (
+        <span style={{ fontSize: "11px", color: tokens.muted, fontFamily: "var(--sans)" }}>
+          Reviewed by {meta.reviewedBy}
+        </span>
+      )}
+    </div>
+  );
+}
+
 // ── Card 1: Summary ────────────────────────────────────────────────────────────
 export function SummaryCard({ card, meta }) {
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <SourceLine meta={meta} />
       <Tag label={card.tag} />
       <h2 style={{
         fontSize: "24px", fontFamily: "var(--serif)", fontWeight: "700",
@@ -20,27 +89,24 @@ export function SummaryCard({ card, meta }) {
       </p>
       <div style={{
         background: tokens.parchmentDark,
-        borderLeft: `3px solid ${tokens.teal}`,
-        borderRadius: "0 8px 8px 0",
+        borderLeft: `2px solid ${tokens.teal}`,
+        borderRadius: "0 6px 6px 0",
         padding: "12px 14px",
-        fontSize: "13px", color: tokens.body, lineHeight: "1.55",
+        fontSize: "13px", color: tokens.body, lineHeight: "1.6",
         fontFamily: "var(--sans)", fontStyle: "italic",
       }}>
         {card.hint}
       </div>
-      <Trust text={
-        meta.reviewedBy
-          ? `Reviewed by ${meta.reviewedBy}${meta.reviewedRole ? `, ${meta.reviewedRole}` : ""}`
-          : `Source: ${meta.source}`
-      } />
+      <Trust text={`Reviewed by ${meta.reviewedBy}${meta.reviewedRole ? `, ${meta.reviewedRole}` : ""}`} />
     </div>
   );
 }
 
 // ── Card 2: Explanation ────────────────────────────────────────────────────────
-export function ExplanationCard({ card }) {
+export function ExplanationCard({ card, meta }) {
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <SourceLine meta={meta} />
       <Tag label={card.tag} />
       <h2 style={{
         fontSize: "21px", fontFamily: "var(--serif)", fontWeight: "700",
@@ -54,24 +120,27 @@ export function ExplanationCard({ card }) {
       }}>
         {card.intro}
       </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
         {(card.bullets || []).map((b, i) => (
           <div key={i} style={{
-            display: "flex", alignItems: "flex-start", gap: "10px",
+            display: "flex", alignItems: "flex-start", gap: "11px",
             padding: "11px 13px",
-            background: i % 2 === 0 ? tokens.tealLight : "transparent",
-            borderRadius: "8px",
+            background: tokens.cardAlt,
+            borderRadius: "6px",
           }}>
             <span style={{
-              minWidth: "20px", height: "20px",
-              background: tokens.teal, color: "white",
-              borderRadius: "50%", fontSize: "10px", fontWeight: "700",
+              minWidth: "18px", height: "18px",
+              border: `1px solid ${tokens.teal}`,
+              color: tokens.teal,
+              borderRadius: "2px",
+              fontSize: "9px", fontWeight: "700",
               display: "flex", alignItems: "center", justifyContent: "center",
-              marginTop: "1px", flexShrink: 0, fontFamily: "var(--sans)",
+              marginTop: "2px", flexShrink: 0, fontFamily: "var(--sans)",
+              letterSpacing: "0",
             }}>
               {i + 1}
             </span>
-            <span style={{ fontSize: "13.5px", color: tokens.body, lineHeight: "1.55", fontFamily: "var(--sans)" }}>
+            <span style={{ fontSize: "13px", color: tokens.body, lineHeight: "1.55", fontFamily: "var(--sans)" }}>
               {b}
             </span>
           </div>
@@ -87,14 +156,15 @@ export function PatternCard({ card, meta }) {
   const steps = card.steps || [];
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <SourceLine meta={meta} />
       <Tag label={card.tag} />
       <h2 style={{
         fontSize: "21px", fontFamily: "var(--serif)", fontWeight: "700",
-        lineHeight: "1.3", color: tokens.ink, margin: "0 0 18px",
+        lineHeight: "1.3", color: tokens.ink, margin: "0 0 16px",
       }}>
         {card.headline}
       </h2>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "stretch" }}>
+      <div style={{ display: "flex", flexDirection: "column" }}>
         {steps.map((step, i) => (
           <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <div style={{
@@ -103,41 +173,46 @@ export function PatternCard({ card, meta }) {
               background: i === 0 ? tokens.navy
                 : i === steps.length - 1 ? tokens.roseLight
                 : tokens.cardAlt,
-              borderRadius: "9px",
+              borderRadius: "6px",
               border: i === steps.length - 1 ? `1px solid ${tokens.rose}` : "none",
             }}>
-              <span style={{ fontSize: "19px" }}>{step.icon}</span>
+              {/* Step number instead of emoji */}
               <span style={{
-                fontSize: "13.5px",
+                minWidth: "22px", height: "22px",
+                border: `1px solid ${i === 0 ? "rgba(255,255,255,0.3)" : i === steps.length - 1 ? tokens.rose : tokens.tealBorder}`,
+                borderRadius: "2px",
+                fontSize: "9px", fontWeight: "700",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0, fontFamily: "var(--sans)",
+                color: i === 0 ? "rgba(255,255,255,0.6)" : i === steps.length - 1 ? tokens.rose : tokens.teal,
+              }}>
+                {i + 1}
+              </span>
+              <span style={{
+                fontSize: "13px",
                 fontWeight: (i === 0 || i === steps.length - 1) ? "600" : "400",
                 color: i === 0 ? "white"
                   : i === steps.length - 1 ? tokens.rose
                   : tokens.body,
                 fontFamily: "var(--sans)",
+                flex: 1,
               }}>
                 {step.label}
               </span>
-              {i === 0 && (
-                <span style={{ marginLeft: "auto", fontSize: "9px", color: "rgba(255,255,255,0.55)", letterSpacing: "0.8px", fontWeight: "700" }}>
-                  START
-                </span>
-              )}
               {i === steps.length - 1 && (
-                <span style={{ marginLeft: "auto", fontSize: "9px", color: tokens.rose, letterSpacing: "0.8px", fontWeight: "700" }}>
-                  LOOP
-                </span>
+                <Icon name="loop" size={14} color={tokens.rose} />
               )}
             </div>
             {i < steps.length - 1 && (
-              <div style={{ width: "1.5px", height: "7px", background: tokens.tealBorder }} />
+              <div style={{ width: "1px", height: "6px", background: tokens.tealBorder }} />
             )}
           </div>
         ))}
       </div>
       {card.note && (
         <div style={{
-          marginTop: "14px", padding: "11px 13px",
-          background: tokens.parchmentDark, borderRadius: "8px",
+          marginTop: "12px", padding: "11px 13px",
+          background: tokens.parchmentDark, borderRadius: "6px",
           fontSize: "12px", color: tokens.body, lineHeight: "1.55",
           fontFamily: "var(--sans)", fontStyle: "italic",
         }}>
@@ -153,10 +228,11 @@ export function PatternCard({ card, meta }) {
 export function TriggersCard({ card, meta }) {
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <SourceLine meta={meta} />
       <Tag label={card.tag} />
       <h2 style={{
         fontSize: "21px", fontFamily: "var(--serif)", fontWeight: "700",
-        lineHeight: "1.3", color: tokens.ink, margin: "0 0 18px",
+        lineHeight: "1.3", color: tokens.ink, margin: "0 0 16px",
       }}>
         {card.headline}
       </h2>
@@ -165,25 +241,22 @@ export function TriggersCard({ card, meta }) {
           <div key={gi}>
             <div style={{
               fontSize: "10px", fontWeight: "700", letterSpacing: "1.2px",
-              textTransform: "uppercase", color: tokens.teal,
-              marginBottom: "8px", fontFamily: "var(--sans)",
+              textTransform: "uppercase",
+              color: gi === 0 ? tokens.teal : tokens.rose,
+              marginBottom: "7px", fontFamily: "var(--sans)",
             }}>
               {group.label}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
               {(group.items || []).map((item, ii) => (
                 <div key={ii} style={{
-                  display: "flex", alignItems: "center", gap: "10px",
+                  display: "flex", alignItems: "flex-start", gap: "10px",
                   padding: "9px 13px",
                   background: gi === 0 ? tokens.tealLight : tokens.roseLight,
-                  borderRadius: "8px",
+                  borderRadius: "6px",
                 }}>
-                  <div style={{
-                    width: "5px", height: "5px", borderRadius: "50%",
-                    background: gi === 0 ? tokens.teal : tokens.rose,
-                    flexShrink: 0,
-                  }} />
-                  <span style={{ fontSize: "13.5px", color: tokens.body, fontFamily: "var(--sans)" }}>
+                  <Icon name="dash" color={gi === 0 ? tokens.teal : tokens.rose} />
+                  <span style={{ fontSize: "13px", color: tokens.body, fontFamily: "var(--sans)", lineHeight: "1.5" }}>
                     {item}
                   </span>
                 </div>
@@ -201,10 +274,11 @@ export function TriggersCard({ card, meta }) {
 export function ActionCard({ card, meta }) {
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <SourceLine meta={meta} />
       <Tag label={card.tag} />
       <h2 style={{
         fontSize: "21px", fontFamily: "var(--serif)", fontWeight: "700",
-        lineHeight: "1.3", color: tokens.ink, margin: "0 0 14px",
+        lineHeight: "1.3", color: tokens.ink, margin: "0 0 12px",
       }}>
         {card.headline}
       </h2>
@@ -214,10 +288,10 @@ export function ActionCard({ card, meta }) {
             display: "flex", alignItems: "flex-start", gap: "12px",
             padding: "11px 13px",
             background: tokens.cardAlt,
-            borderRadius: "9px",
+            borderRadius: "6px",
           }}>
-            <span style={{ fontSize: "20px", flexShrink: 0, marginTop: "1px" }}>{a.emoji}</span>
-            <div>
+            <Icon name="check" size={16} color={tokens.teal} />
+            <div style={{ marginTop: "-1px" }}>
               <div style={{ fontSize: "13px", fontWeight: "600", color: tokens.ink, marginBottom: "3px", fontFamily: "var(--sans)" }}>
                 {a.title}
               </div>
@@ -237,51 +311,48 @@ export function ActionCard({ card, meta }) {
 export function FullArticleCard({ card, meta }) {
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      {/* Dark header */}
       <div style={{
-        background: tokens.navy, borderRadius: "12px",
-        padding: "20px 18px", marginBottom: "18px",
+        background: tokens.navy, borderRadius: "10px",
+        padding: "20px 18px", marginBottom: "16px",
       }}>
         <div style={{
-          fontSize: "9.5px", fontWeight: "700", letterSpacing: "1.4px",
-          textTransform: "uppercase", color: "rgba(255,255,255,0.45)",
-          marginBottom: "10px", fontFamily: "var(--sans)",
+          display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px",
         }}>
-          SOURCE ARTICLE
+          <div style={{
+            fontSize: "10px", fontWeight: "700", letterSpacing: "0.8px",
+            textTransform: "uppercase", color: "white",
+            background: "#CC0000",
+            padding: "3px 7px", borderRadius: "2px",
+            fontFamily: "var(--sans)",
+          }}>
+            Verywell Mind
+          </div>
+          <span style={{
+            background: tokens.teal, color: "white",
+            fontSize: "9px", fontWeight: "700", letterSpacing: "0.5px",
+            textTransform: "uppercase", padding: "3px 7px", borderRadius: "2px",
+            fontFamily: "var(--sans)",
+          }}>
+            Medically Reviewed
+          </span>
         </div>
         <h2 style={{
-          fontSize: "18px", fontFamily: "var(--serif)", fontWeight: "700",
-          lineHeight: "1.35", color: "white", margin: "0 0 10px",
+          fontSize: "17px", fontFamily: "var(--serif)", fontWeight: "700",
+          lineHeight: "1.35", color: "white", margin: 0,
         }}>
           {card.headline || meta.title}
         </h2>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{
-            background: tokens.teal, color: "white",
-            fontSize: "9px", fontWeight: "700", letterSpacing: "0.6px",
-            textTransform: "uppercase", padding: "3px 8px", borderRadius: "3px",
-            fontFamily: "var(--sans)",
-          }}>
-            {meta.reviewedBy ? "Medically Reviewed" : "Editorial"}
-          </span>
-          <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", fontFamily: "var(--sans)" }}>
-            {meta.source}
-          </span>
-        </div>
       </div>
 
+      {/* Reviewer row */}
       {meta.reviewedBy && (
         <div style={{
           display: "flex", alignItems: "center", gap: "12px",
-          padding: "12px 14px",
-          background: tokens.parchmentDark, borderRadius: "9px", marginBottom: "14px",
+          padding: "11px 13px",
+          background: tokens.parchmentDark, borderRadius: "6px", marginBottom: "14px",
         }}>
-          <div style={{
-            width: "36px", height: "36px", background: tokens.teal,
-            borderRadius: "50%", display: "flex", alignItems: "center",
-            justifyContent: "center", color: "white", fontSize: "14px", flexShrink: 0,
-          }}>
-            👨‍⚕️
-          </div>
+          <Icon name="shield" size={18} color={tokens.teal} />
           <div>
             <div style={{ fontSize: "12px", fontWeight: "600", color: tokens.ink, fontFamily: "var(--sans)" }}>
               {meta.reviewedBy}
@@ -295,30 +366,32 @@ export function FullArticleCard({ card, meta }) {
 
       <p style={{
         fontSize: "13px", color: tokens.body, lineHeight: "1.6",
-        fontFamily: "var(--sans)", margin: "0 0 16px",
+        fontFamily: "var(--sans)", margin: "0 0 14px",
       }}>
         {card.excerpt}
       </p>
 
       <div style={{
-        display: "flex", alignItems: "center", gap: "10px",
-        marginBottom: "18px", fontSize: "11.5px", color: tokens.muted,
-        fontFamily: "var(--sans)",
+        display: "flex", alignItems: "center", gap: "8px",
+        marginBottom: "18px",
       }}>
-        <span>📖 {meta.readTime}</span>
-        <span style={{ color: tokens.border }}>·</span>
-        <span>{meta.source}</span>
+        <Icon name="book" size={13} color={tokens.muted} />
+        <span style={{ fontSize: "11.5px", color: tokens.muted, fontFamily: "var(--sans)" }}>
+          {meta.readTime} · {meta.source}
+        </span>
       </div>
 
       <a href={meta.articleUrl || "#"} style={{
-        display: "block", padding: "14px",
+        display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+        padding: "14px",
         background: tokens.navy, color: "white",
-        borderRadius: "10px", textDecoration: "none",
-        fontSize: "14px", fontWeight: "700", textAlign: "center",
+        borderRadius: "8px", textDecoration: "none",
+        fontSize: "14px", fontWeight: "700",
         letterSpacing: "0.2px", fontFamily: "var(--sans)",
         marginTop: "auto",
       }}>
-        Read full article on {meta.source} →
+        Read full article on Verywell Mind
+        <Icon name="arrow-right" size={16} color="white" />
       </a>
     </div>
   );
