@@ -77,7 +77,7 @@ export default function App() {
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
           font-family: var(--sans);
-          background: #E8E1D5;
+          background: ${tokens.bg};
           min-height: 100vh;
           display: flex;
           align-items: center;
@@ -88,34 +88,37 @@ export default function App() {
       `}</style>
 
       <div style={{
-        width: "390px", height: "844px",
-        background: tokens.bg,
-        display: "flex", flexDirection: "column",
-        overflow: "hidden", fontFamily: "var(--sans)",
-      }}>
-        {/* Top bar */}
+        width: "390px",
+        maxHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        fontFamily: "var(--sans)",
+        padding: "16px 16px 12px",
+      }}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        {/* Card — no top bar, no chip */}
+        <div style={cardStyle}>
+          <CardContent card={article.cards[current]} meta={meta} />
+        </div>
+
+        {/* Navigation */}
         <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "14px 20px 12px", background: tokens.navy,
+          display: "flex", alignItems: "center",
+          paddingTop: "12px", gap: "12px",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <div style={{
-              width: "30px", height: "30px", background: tokens.teal,
-              borderRadius: "8px", display: "flex", alignItems: "center",
-              justifyContent: "center", fontSize: "14px",
-            }}>🌿</div>
-            <div>
-              <div style={{ fontFamily: "var(--serif)", fontWeight: "700", fontSize: "14px", color: "white", lineHeight: "1" }}>
-                EczemaSpace
-              </div>
-              <div style={{ fontSize: "9.5px", color: "rgba(255,255,255,0.4)", marginTop: "2px" }}>
-                Calm. Informed. Ready.
-              </div>
-            </div>
-          </div>
+          <button onClick={prev} disabled={current === 0} style={{
+            width: "44px", height: "44px", borderRadius: "50%",
+            border: `1px solid ${tokens.border}`, background: "white",
+            color: current === 0 ? tokens.border : tokens.body,
+            fontSize: "16px", cursor: current === 0 ? "default" : "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0, transition: "all 0.2s",
+          }}>←</button>
 
           {/* Progress dots */}
-          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
             {article.cards.map((_, i) => (
               <div
                 key={i}
@@ -126,65 +129,12 @@ export default function App() {
                   background: i === current
                     ? tokens.teal
                     : i < current
-                    ? "rgba(255,255,255,0.3)"
-                    : "rgba(255,255,255,0.15)",
+                    ? tokens.tealBorder
+                    : tokens.border,
                   transition: "all 0.3s ease", cursor: "pointer",
                 }}
               />
             ))}
-            <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", marginLeft: "3px" }}>
-              {current + 1}/{total}
-            </span>
-          </div>
-        </div>
-
-        {/* Topic chip */}
-        <div style={{ padding: "10px 20px 0" }}>
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: "7px",
-            background: tokens.parchmentDark, border: `1px solid ${tokens.border}`,
-            borderRadius: "4px", padding: "5px 11px",
-            fontSize: "11.5px", color: tokens.body, fontWeight: "500",
-          }}>
-            <span>📰</span>
-            <span style={{ maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {meta.title}
-            </span>
-            <span style={{ color: tokens.border, margin: "0 1px" }}>·</span>
-            <span style={{ color: tokens.muted, whiteSpace: "nowrap" }}>{meta.source}</span>
-          </div>
-        </div>
-
-        {/* Card */}
-        <div
-          style={{ flex: 1, padding: "10px 16px 0", display: "flex", flexDirection: "column" }}
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
-        >
-          <div style={cardStyle}>
-            <CardContent card={article.cards[current]} meta={meta} />
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <div style={{ display: "flex", alignItems: "center", padding: "12px 20px 18px", gap: "12px" }}>
-          <button onClick={prev} disabled={current === 0} style={{
-            width: "44px", height: "44px", borderRadius: "50%",
-            border: `1px solid ${tokens.border}`, background: "white",
-            color: current === 0 ? tokens.border : tokens.body,
-            fontSize: "16px", cursor: current === 0 ? "default" : "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            flexShrink: 0, transition: "all 0.2s",
-          }}>←</button>
-
-          <div style={{ flex: 1, textAlign: "center" }}>
-            {current === 0 && <span style={{ fontSize: "11px", color: tokens.muted }}>Swipe or tap → to continue</span>}
-            {current > 0 && current < total - 1 && (
-              <span style={{ fontSize: "11px", color: tokens.muted }}>
-                {total - current - 1} card{total - current - 1 !== 1 ? "s" : ""} remaining
-              </span>
-            )}
-            {current === total - 1 && <span style={{ fontSize: "11px", color: tokens.teal, fontWeight: "600" }}>End of sequence</span>}
           </div>
 
           <button onClick={next} disabled={current === total - 1} style={{
