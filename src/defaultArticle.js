@@ -9,7 +9,7 @@ export const defaultArticle = {
     reviewedBy: "Dr. Brendan Camp, MD",
     reviewedRole: "Double board-certified dermatologist",
     readTime: "8 min read",
-    articleUrl: "#",
+    articleUrl: "https://www.verywellmind.com/the-impact-of-stress-on-eczema-11690763",
   },
   cards: [
     {
