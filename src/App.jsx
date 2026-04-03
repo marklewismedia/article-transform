@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
 import { tokens } from "./tokens.js";
 import { defaultArticle } from "./defaultArticle.js";
-import { UploadScreen } from "./UploadScreen.jsx";
 import {
   SummaryCard,
   ExplanationCard,
@@ -11,7 +10,6 @@ import {
   FullArticleCard,
 } from "./cards.jsx";
 
-// ── Card dispatcher ────────────────────────────────────────────────────────────
 function CardContent({ card, meta }) {
   switch (card.type) {
     case "summary":      return <SummaryCard      card={card} meta={meta} />;
@@ -24,14 +22,14 @@ function CardContent({ card, meta }) {
   }
 }
 
-// ── Card viewer ────────────────────────────────────────────────────────────────
-function CardViewer({ article, onReset }) {
+export default function App() {
   const [current, setCurrent] = useState(0);
   const [anim, setAnim]       = useState(null);
   const touchStartX = useRef(null);
   const touchStartY = useRef(null);
-  const total = article.cards.length;
-  const meta  = article.metadata;
+  const article = defaultArticle;
+  const total   = article.cards.length;
+  const meta    = article.metadata;
 
   const goTo = (index, dir) => {
     if (anim || index < 0 || index >= total) return;
@@ -69,173 +67,6 @@ function CardViewer({ article, onReset }) {
   };
 
   return (
-    <div style={{
-      width: "390px",
-      height: "844px",
-      background: tokens.bg,
-      display: "flex",
-      flexDirection: "column",
-      overflow: "hidden",
-      fontFamily: "var(--sans)",
-    }}>
-      {/* ── Top bar ── */}
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "14px 20px 12px",
-        background: tokens.navy,
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <div style={{
-            width: "30px", height: "30px", background: tokens.teal,
-            borderRadius: "8px", display: "flex", alignItems: "center",
-            justifyContent: "center", fontSize: "14px",
-          }}>🌿</div>
-          <div>
-            <div style={{
-              fontFamily: "var(--serif)", fontWeight: "700",
-              fontSize: "14px", color: "white", lineHeight: "1",
-            }}>EczemaSpace</div>
-            <div style={{ fontSize: "9.5px", color: "rgba(255,255,255,0.4)", marginTop: "2px" }}>
-              Calm. Informed. Ready.
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {/* Progress dots */}
-          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            {article.cards.map((_, i) => (
-              <div
-                key={i}
-                onClick={() => goTo(i, i > current ? "left" : "right")}
-                style={{
-                  width: i === current ? "20px" : "6px",
-                  height: "6px", borderRadius: "3px",
-                  background: i === current
-                    ? tokens.teal
-                    : i < current
-                    ? "rgba(255,255,255,0.3)"
-                    : "rgba(255,255,255,0.15)",
-                  transition: "all 0.3s ease",
-                  cursor: "pointer",
-                }}
-              />
-            ))}
-            <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", marginLeft: "3px" }}>
-              {current + 1}/{total}
-            </span>
-          </div>
-
-          {/* New article button */}
-          <button
-            onClick={onReset}
-            title="Upload new article"
-            style={{
-              background: "rgba(255,255,255,0.1)",
-              border: "1px solid rgba(255,255,255,0.15)",
-              color: "rgba(255,255,255,0.7)",
-              borderRadius: "6px",
-              padding: "4px 8px",
-              fontSize: "11px",
-              cursor: "pointer",
-              fontFamily: "var(--sans)",
-            }}
-          >
-            ＋ New
-          </button>
-        </div>
-      </div>
-
-      {/* ── Topic chip ── */}
-      <div style={{ padding: "10px 20px 0" }}>
-        <div style={{
-          display: "inline-flex", alignItems: "center", gap: "7px",
-          background: tokens.parchmentDark,
-          border: `1px solid ${tokens.border}`,
-          borderRadius: "4px", padding: "5px 11px",
-          fontSize: "11.5px", color: tokens.body, fontWeight: "500",
-        }}>
-          <span>📰</span>
-          <span style={{
-            maxWidth: "200px", overflow: "hidden",
-            textOverflow: "ellipsis", whiteSpace: "nowrap",
-          }}>
-            {meta.title}
-          </span>
-          <span style={{ color: tokens.border, margin: "0 1px" }}>·</span>
-          <span style={{ color: tokens.muted, whiteSpace: "nowrap" }}>{meta.source}</span>
-        </div>
-      </div>
-
-      {/* ── Card ── */}
-      <div
-        style={{ flex: 1, padding: "10px 16px 0", display: "flex", flexDirection: "column" }}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-      >
-        <div style={cardStyle}>
-          <CardContent card={article.cards[current]} meta={meta} />
-        </div>
-      </div>
-
-      {/* ── Navigation ── */}
-      <div style={{
-        display: "flex", alignItems: "center",
-        padding: "12px 20px 18px", gap: "12px",
-      }}>
-        <button onClick={prev} disabled={current === 0} style={{
-          width: "44px", height: "44px", borderRadius: "50%",
-          border: `1px solid ${tokens.border}`,
-          background: "white",
-          color: current === 0 ? tokens.border : tokens.body,
-          fontSize: "16px", cursor: current === 0 ? "default" : "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          flexShrink: 0, transition: "all 0.2s",
-        }}>←</button>
-
-        <div style={{ flex: 1, textAlign: "center" }}>
-          {current === 0 && (
-            <span style={{ fontSize: "11px", color: tokens.muted }}>Swipe or tap → to continue</span>
-          )}
-          {current > 0 && current < total - 1 && (
-            <span style={{ fontSize: "11px", color: tokens.muted }}>
-              {total - current - 1} card{total - current - 1 !== 1 ? "s" : ""} remaining
-            </span>
-          )}
-          {current === total - 1 && (
-            <span style={{ fontSize: "11px", color: tokens.teal, fontWeight: "600" }}>End of sequence</span>
-          )}
-        </div>
-
-        <button onClick={next} disabled={current === total - 1} style={{
-          width: "44px", height: "44px", borderRadius: "50%",
-          border: "none",
-          background: current === total - 1 ? tokens.border : tokens.navy,
-          color: "white", fontSize: "16px",
-          cursor: current === total - 1 ? "default" : "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          flexShrink: 0, transition: "all 0.2s",
-          boxShadow: current === total - 1 ? "none" : `0 4px 14px rgba(30,43,58,0.28)`,
-        }}>→</button>
-      </div>
-    </div>
-  );
-}
-
-// ── Root App ───────────────────────────────────────────────────────────────────
-export default function App() {
-  // "viewer" shows the default article on first load.
-  // "upload" shows the upload screen.
-  // When a new article comes back from the API, we switch back to "viewer".
-  const [view,    setView]    = useState("viewer");
-  const [article, setArticle] = useState(defaultArticle);
-
-  const handleArticleReady = (newArticle) => {
-    setArticle(newArticle);
-    setView("viewer");
-  };
-
-  return (
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap');
@@ -256,14 +87,118 @@ export default function App() {
         ::-webkit-scrollbar { width: 0; }
       `}</style>
 
-      {view === "upload" ? (
-        <UploadScreen onArticleReady={handleArticleReady} />
-      ) : (
-        <CardViewer
-          article={article}
-          onReset={() => setView("upload")}
-        />
-      )}
+      <div style={{
+        width: "390px", height: "844px",
+        background: tokens.bg,
+        display: "flex", flexDirection: "column",
+        overflow: "hidden", fontFamily: "var(--sans)",
+      }}>
+        {/* Top bar */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "14px 20px 12px", background: tokens.navy,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{
+              width: "30px", height: "30px", background: tokens.teal,
+              borderRadius: "8px", display: "flex", alignItems: "center",
+              justifyContent: "center", fontSize: "14px",
+            }}>🌿</div>
+            <div>
+              <div style={{ fontFamily: "var(--serif)", fontWeight: "700", fontSize: "14px", color: "white", lineHeight: "1" }}>
+                EczemaSpace
+              </div>
+              <div style={{ fontSize: "9.5px", color: "rgba(255,255,255,0.4)", marginTop: "2px" }}>
+                Calm. Informed. Ready.
+              </div>
+            </div>
+          </div>
+
+          {/* Progress dots */}
+          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            {article.cards.map((_, i) => (
+              <div
+                key={i}
+                onClick={() => goTo(i, i > current ? "left" : "right")}
+                style={{
+                  width: i === current ? "20px" : "6px",
+                  height: "6px", borderRadius: "3px",
+                  background: i === current
+                    ? tokens.teal
+                    : i < current
+                    ? "rgba(255,255,255,0.3)"
+                    : "rgba(255,255,255,0.15)",
+                  transition: "all 0.3s ease", cursor: "pointer",
+                }}
+              />
+            ))}
+            <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", marginLeft: "3px" }}>
+              {current + 1}/{total}
+            </span>
+          </div>
+        </div>
+
+        {/* Topic chip */}
+        <div style={{ padding: "10px 20px 0" }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: "7px",
+            background: tokens.parchmentDark, border: `1px solid ${tokens.border}`,
+            borderRadius: "4px", padding: "5px 11px",
+            fontSize: "11.5px", color: tokens.body, fontWeight: "500",
+          }}>
+            <span>📰</span>
+            <span style={{ maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {meta.title}
+            </span>
+            <span style={{ color: tokens.border, margin: "0 1px" }}>·</span>
+            <span style={{ color: tokens.muted, whiteSpace: "nowrap" }}>{meta.source}</span>
+          </div>
+        </div>
+
+        {/* Card */}
+        <div
+          style={{ flex: 1, padding: "10px 16px 0", display: "flex", flexDirection: "column" }}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
+          <div style={cardStyle}>
+            <CardContent card={article.cards[current]} meta={meta} />
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <div style={{ display: "flex", alignItems: "center", padding: "12px 20px 18px", gap: "12px" }}>
+          <button onClick={prev} disabled={current === 0} style={{
+            width: "44px", height: "44px", borderRadius: "50%",
+            border: `1px solid ${tokens.border}`, background: "white",
+            color: current === 0 ? tokens.border : tokens.body,
+            fontSize: "16px", cursor: current === 0 ? "default" : "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0, transition: "all 0.2s",
+          }}>←</button>
+
+          <div style={{ flex: 1, textAlign: "center" }}>
+            {current === 0 && <span style={{ fontSize: "11px", color: tokens.muted }}>Swipe or tap → to continue</span>}
+            {current > 0 && current < total - 1 && (
+              <span style={{ fontSize: "11px", color: tokens.muted }}>
+                {total - current - 1} card{total - current - 1 !== 1 ? "s" : ""} remaining
+              </span>
+            )}
+            {current === total - 1 && <span style={{ fontSize: "11px", color: tokens.teal, fontWeight: "600" }}>End of sequence</span>}
+          </div>
+
+          <button onClick={next} disabled={current === total - 1} style={{
+            width: "44px", height: "44px", borderRadius: "50%",
+            border: "none",
+            background: current === total - 1 ? tokens.border : tokens.navy,
+            color: "white", fontSize: "16px",
+            cursor: current === total - 1 ? "default" : "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0, transition: "all 0.2s",
+            boxShadow: current === total - 1 ? "none" : `0 4px 14px rgba(30,43,58,0.28)`,
+          }}>→</button>
+        </div>
+      </div>
     </>
   );
 }
